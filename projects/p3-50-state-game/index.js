@@ -76,3 +76,119 @@ var abvMap = {
  * will be different. Make sure you Google! We urge you to post in Piazza if
  * you are stuck.
  */
+var timer = 0;
+var startButton = document.getElementById("start");
+var textEntry = document.getElementById("entrybox");
+var timeout = null;
+var oldText = '';
+var statesFound = [];
+var foundList = document.getElementById("foundList");
+var missedList = document.getElementById("missedList");
+var statesCopy = states.slice();
+var foundHead = document.getElementById("foundHead");
+
+initGame();
+
+$('body').on({
+    'mouseenter': function(){
+        ($(this)).children().show();
+    }},
+    'li.state'
+);
+$('body').on({
+    'mouseleave': function(){
+        ($(this)).children().hide();
+    }},
+    'li.state'
+);
+
+function startTimer() {
+    initGame()
+    startButton.disabled = true;
+    textEntry.disabled = false;
+    textEntry.focus();
+    timeout = setInterval(decrementTimer, 1000);
+}
+
+function decrementTimer() {
+    timer -= 1;
+    $('#timeDisplay').text("Time Left: " +timer);
+    if (timer <= 0) {
+        timeElapsed()
+        clearInterval(timeout);
+    }
+}
+
+function timeElapsed() {
+    for (elem of statesCopy) {
+        var entry = document.createElement('li');
+        entry.className = "state";
+        entry.appendChild(document.createTextNode(elem));
+        appendSpanishData(entry, elem);
+        missedList.appendChild(entry);
+    }
+    textEntry.disabled = true;
+    startButton.disabled = false;
+    finishGame();
+}
+
+function appendSpanishData(element, text) {
+    var url = 'https://api.census.gov/data/2013/language?get=EST,LANLABEL,NAME&for=state:' +abvMap[text] +'&LAN=625';
+    $.get(url, function (data) {
+        console.log(data[1][0]);
+        var dataNode = document.createElement('div');
+        dataNode.appendChild(document.createTextNode("Spanish speakers: " +data[1][0].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")));
+        dataNode.hidden = true;
+        element.appendChild(dataNode);
+    });
+}
+
+function handleChange() {
+    var newText = textEntry.value;
+    if (newText == oldText) {
+        return;
+    } else {
+        checkState(newText);
+        oldText = newText;
+    }
+}
+
+function checkState(text) {
+    var found = statesCopy.indexOf(text);
+    if (found != -1) {
+        var entry = document.createElement('li');
+        entry.className = "state";
+        entry.appendChild(document.createTextNode(text));
+        appendSpanishData(entry, text);
+        foundList.appendChild(entry);
+        statesCopy.splice(found, 1);
+    }
+    if (statesCopy.length == 0) {
+        textEntry.disabled = true;
+        startButton.disabled = false;
+        clearInterval(timeout);
+        finishGame();
+    }
+}
+
+function initGame() {
+    statesCopy = states.slice();
+    foundList.innerHTML = "";
+    missedList.innerHTML = "";
+    timer = 20;
+    $('#timeDisplay').text("Time Left: " +timer);
+    textEntry.value = "";
+    document.getElementById("foundHead").textContent = "States Found: ";
+    document.getElementById("missedHead").textContent = "States Missed: ";
+}
+
+function finishGame() {
+    document.getElementById("foundHead").textContent = "States Found: " +(states.length - statesCopy.length).toString() +"/" +states.length.toString();
+    var missedHead = "";
+    if (statesCopy.length == 0) {
+        missedHead = "States Missed: 0/" +states.length.toString() + " You win!";
+    } else {
+        missedHead = "States Missed: " +statesCopy.length.toString() +"/" +states.length.toString() + " Try Again!";
+    }
+    document.getElementById("missedHead").textContent = missedHead;
+}

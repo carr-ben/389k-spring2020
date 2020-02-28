@@ -25,6 +25,10 @@
         the user hitting enter?
         3. How do I disable the input bar if the game is not in session?
     -->
+    <form>
+        <label for="entrybox">Entry Box:</label><br>
+        <input onkeydown="return (event.keyCode!=13);" onkeyup="handleChange()" type="text" id="entrybox" name="entrybox" disabled>
+    </form>
 
     <!--
     2. Implement the running list of states.
@@ -36,15 +40,26 @@
         4. How will I seperate the entered states from missed states when the
         game is over if the user lost the game?
     -->
+    <h3 id="foundHead">States Found:</h3>
+    <ul id = "foundList">
+        
+    </ul>
+    <h3 id="missedHead">States Missed:</h3>
+    <ul id = "missedList">
 
+    </ul>
     <!--
     3. Implement the timer. This is almost all JavaScript.
     -->
+
+    <h3 id="timeDisplay">Time left: 20</h3>
 
     <!--
     4. Implement the start button. The start button must activate the input box
     to allow input start the timer.
     -->
+
+    <button onclick="startTimer()" id="start">Start Game!</button><br>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" type="text/javascript"></script>
     <script src="index.js" type="text/javascript"></script>
